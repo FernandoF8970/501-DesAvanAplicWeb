@@ -1,32 +1,47 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const RealTimeNotifications = () => {
-  const [notifications, setNotifications] = useState<string[]>([]);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080');
+    socketRef.current = new WebSocket('ws://localhost:8080');
 
-    ws.onopen = () => {
-      console.log('Connected to WebSocket server');
-      ws.send('Hello from client!');
-    };
-
-    ws.onmessage = (event) => {
-      const message = event.data;
-      setNotifications((prev) => [...prev, message]);
+    socketRef.current.onmessage = event => {
+      setMessages(prev => [...prev, event.data]);
     };
 
     return () => {
-      ws.close();
+      socketRef.current?.close();
     };
   }, []);
 
+  const handleSend = () => {
+    if (socketRef.current?.readyState === WebSocket.OPEN && inputValue.trim()) {
+      socketRef.current.send(inputValue);
+      setInputValue('');
+    }
+  };
+
   return (
     <div>
-      <h2>Real-Time Notifications</h2>
+      <h2>Notifications</h2>
+
+      <div style={{ marginBottom: '1rem' }}>
+        <input
+          type="text"
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
+          placeholder="Escribe un mensaje"
+          style={{ padding: 8, marginRight: 8 }}
+        />
+        <button onClick={handleSend}>Enviar</button>
+      </div>
+
       <ul>
-        {notifications.map((msg, idx) => (
-          <li key={idx}>{msg}</li>
+        {messages.map((msg, i) => (
+          <li key={i}>{msg}</li>
         ))}
       </ul>
     </div>
