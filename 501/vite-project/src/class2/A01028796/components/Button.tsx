@@ -1,6 +1,4 @@
 /** @jsxImportSource react */
-import React from "react";
-
 interface ButtonProps {
   label: string;
   type?: "button" | "submit" | "reset";

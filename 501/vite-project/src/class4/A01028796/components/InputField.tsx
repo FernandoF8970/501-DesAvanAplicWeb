@@ -1,4 +1,4 @@
-/** @jsxImportSource react */
+  /** @jsxImportSource react */
 interface InputFieldProps {
     type: string;
     placeholder: string;
